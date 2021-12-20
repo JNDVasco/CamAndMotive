@@ -20,6 +20,8 @@ link_directories("./NatNetSDK/Samples/bin/x64" "./NatNetSDK/lib/x64/")
 # =================== #
 # Directories ZED SDK #
 # =================== #
+option(LINK_SHARED_ZED "Link with the ZED SDK shared executable" ON)
+
 find_package(ZED 2 REQUIRED)
 find_package(CUDA ${ZED_CUDA_VERSION} EXACT REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -48,3 +50,11 @@ endif ()
 # =================== #
 add_executable(Main main.cpp)
 target_link_libraries(Main NatNetLib.lib realsense2.lib ${ZED_LIBS} ${OpenCV_LIBRARIES})
+
+if (INSTALL_SAMPLES)
+    list(APPEND SAMPLE_LIST Main)
+    set(SAMPLE_LIST "${SAMPLE_LIST}" PARENT_SCOPE)
+endif ()
+
+add_executable(SampleClient NatNetSDK/Samples/SampleClient/SampleClient.cpp)
+target_link_libraries(SampleClient NatNetLib.lib)

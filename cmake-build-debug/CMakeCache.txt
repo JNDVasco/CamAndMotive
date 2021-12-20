@@ -373,6 +373,9 @@ GLUT_LIBRARY:BOOL=C:/Program Files (x86)/ZED SDK/dependencies/freeglut_2.8/x64/f
 
 GLUT_LIBRARY_DIRS:BOOL=C:/Program Files (x86)/ZED SDK/dependencies/freeglut_2.8/x64
 
+//Link with the ZED SDK shared executable
+LINK_SHARED_ZED:BOOL=ON
+
 OPENCV_FOUND:BOOL=TRUE
 
 OpenCV_DIR:BOOL=C:/Program Files (x86)/ZED SDK/dependencies/opencv_3.1.0

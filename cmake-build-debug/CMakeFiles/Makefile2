@@ -52,6 +52,7 @@ CMAKE_BINARY_DIR = "C:\Documentos 2\CLion\CamAndMotive\cmake-build-debug"
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
+all: CMakeFiles\SampleClient.dir\all
 all: CMakeFiles\Main.dir\all
 .PHONY : all
 
@@ -60,8 +61,35 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
+clean: CMakeFiles\SampleClient.dir\clean
 clean: CMakeFiles\Main.dir\clean
 .PHONY : clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/SampleClient.dir
+
+# All Build rule for target.
+CMakeFiles\SampleClient.dir\all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SampleClient.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\SampleClient.dir\depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SampleClient.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\SampleClient.dir\build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="C:\Documentos 2\CLion\CamAndMotive\cmake-build-debug\CMakeFiles" --progress-num=3,4 "Built target SampleClient"
+.PHONY : CMakeFiles\SampleClient.dir\all
+
+# Build rule for subdir invocation for target.
+CMakeFiles\SampleClient.dir\rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start "C:\Documentos 2\CLion\CamAndMotive\cmake-build-debug\CMakeFiles" 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 /nologo -$(MAKEFLAGS) CMakeFiles\SampleClient.dir\all
+	$(CMAKE_COMMAND) -E cmake_progress_start "C:\Documentos 2\CLion\CamAndMotive\cmake-build-debug\CMakeFiles" 0
+.PHONY : CMakeFiles\SampleClient.dir\rule
+
+# Convenience name for target.
+SampleClient: CMakeFiles\SampleClient.dir\rule
+.PHONY : SampleClient
+
+# clean rule for target.
+CMakeFiles\SampleClient.dir\clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SampleClient.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\SampleClient.dir\clean
+.PHONY : CMakeFiles\SampleClient.dir\clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/Main.dir

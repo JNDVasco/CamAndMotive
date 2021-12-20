@@ -106,6 +106,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named SampleClient
+
+# Build rule for target.
+SampleClient: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 /nologo -$(MAKEFLAGS) SampleClient
+.PHONY : SampleClient
+
+# fast build rule for target.
+SampleClient\fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SampleClient.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\SampleClient.dir\build
+.PHONY : SampleClient\fast
+
+#=============================================================================
 # Target rules for targets named Main
 
 # Build rule for target.
@@ -117,6 +130,30 @@ Main: cmake_check_build_system
 Main\fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Main.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\Main.dir\build
 .PHONY : Main\fast
+
+NatNetSDK\Samples\SampleClient\SampleClient.obj: NatNetSDK\Samples\SampleClient\SampleClient.cpp.obj
+.PHONY : NatNetSDK\Samples\SampleClient\SampleClient.obj
+
+# target to build an object file
+NatNetSDK\Samples\SampleClient\SampleClient.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SampleClient.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\SampleClient.dir\NatNetSDK\Samples\SampleClient\SampleClient.cpp.obj
+.PHONY : NatNetSDK\Samples\SampleClient\SampleClient.cpp.obj
+
+NatNetSDK\Samples\SampleClient\SampleClient.i: NatNetSDK\Samples\SampleClient\SampleClient.cpp.i
+.PHONY : NatNetSDK\Samples\SampleClient\SampleClient.i
+
+# target to preprocess a source file
+NatNetSDK\Samples\SampleClient\SampleClient.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SampleClient.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\SampleClient.dir\NatNetSDK\Samples\SampleClient\SampleClient.cpp.i
+.PHONY : NatNetSDK\Samples\SampleClient\SampleClient.cpp.i
+
+NatNetSDK\Samples\SampleClient\SampleClient.s: NatNetSDK\Samples\SampleClient\SampleClient.cpp.s
+.PHONY : NatNetSDK\Samples\SampleClient\SampleClient.s
+
+# target to generate assembly for a file
+NatNetSDK\Samples\SampleClient\SampleClient.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SampleClient.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\SampleClient.dir\NatNetSDK\Samples\SampleClient\SampleClient.cpp.s
+.PHONY : NatNetSDK\Samples\SampleClient\SampleClient.cpp.s
 
 main.obj: main.cpp.obj
 .PHONY : main.obj
@@ -151,6 +188,10 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... Main
+	@echo ... SampleClient
+	@echo ... NatNetSDK/Samples/SampleClient/SampleClient.obj
+	@echo ... NatNetSDK/Samples/SampleClient/SampleClient.i
+	@echo ... NatNetSDK/Samples/SampleClient/SampleClient.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
