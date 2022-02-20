@@ -1,4 +1,4 @@
-C:/Documentos 2/CLion/CamAndMotive/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Documentos 2/CLion/CamAndMotive/cmake-build-debug/CMakeFiles/SampleClient.dir
-C:/Documentos 2/CLion/CamAndMotive/cmake-build-debug/CMakeFiles/Main.dir
-C:/Documentos 2/CLion/CamAndMotive/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/cmake-build-debug/CMakeFiles/SampleClient.dir
+C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/cmake-build-debug/CMakeFiles/Main.dir
+C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/cmake-build-debug/CMakeFiles/rebuild_cache.dir

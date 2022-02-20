@@ -54,35 +54,15 @@ Usage [optional]:
 char getch();
 #endif
 
-void _WriteHeader(FILE *fp, sDataDescriptions *pBodyDefs);
-
-void _WriteFrame(FILE *fp, sFrameOfMocapData *data);
-
-void _WriteFooter(FILE *fp);
-
-void NATNET_CALLCONV
-ServerDiscoveredCallback(const sNatNetDiscoveredServer *pDiscoveredServer, void *pUserContext);
-
-void NATNET_CALLCONV
-DataHandler(sFrameOfMocapData
-            *data,
-            void *pUserData
-);    // receives data from the server
-void NATNET_CALLCONV
-MessageHandler(Verbosity
-               msgType,
-               const char *msg
-);      // receives NatNet error messages
+void NATNET_CALLCONV DataHandler(sFrameOfMocapData *data, void *pUserData);    // receives data from the server
+void NATNET_CALLCONV MessageHandler(Verbosity msgType, const char *msg);      // receives NatNet error messages
 void resetClient();
-
 int ConnectClient();
-
 int ConnectClient();
-
 static const ConnectionType kDefaultConnectionType = ConnectionType_Multicast;
 
 NatNetClient *g_pClient = NULL;
-FILE *g_outputFile;
+
 
 std::vector<sNatNetDiscoveredServer> g_discoveredServers;
 sNatNetClientConnectParams g_connectParams;
@@ -131,7 +111,6 @@ int main(int argc, char *argv[])
         printf("Press Q at any time to quit.\n\n");
 
         NatNetDiscoveryHandle discovery;
-        NatNet_CreateAsyncServerDiscovery(&discovery, ServerDiscoveredCallback);
 
         while (const int c = getch())
         {
@@ -331,26 +310,6 @@ int main(int argc, char *argv[])
         }
     }
 
-
-    // Create data file for writing received stream into
-    const char *szFile = "Client-output.pts";
-    if (argc > 3)
-        szFile = argv[3];
-
-    g_outputFile = fopen(szFile, "w");
-    if (!g_outputFile)
-    {
-        printf("Error opening output file %s.  Exiting.\n", szFile);
-        exit(1);
-    }
-
-    if (pDataDefs)
-    {
-        _WriteHeader(g_outputFile, pDataDefs);
-        NatNet_FreeDescriptions(pDataDefs);
-        pDataDefs = NULL;
-    }
-
     // Ready to receive marker stream!
     printf("\nClient is connected to server and listening for data...\n");
     bool bExit = false;
@@ -428,42 +387,7 @@ int main(int argc, char *argv[])
         g_pClient = NULL;
     }
 
-    if (g_outputFile)
-    {
-        _WriteFooter(g_outputFile);
-        fclose(g_outputFile);
-        g_outputFile = NULL;
-    }
-
     return ErrorCode_OK;
-}
-
-
-void NATNET_CALLCONV
-ServerDiscoveredCallback(const sNatNetDiscoveredServer *pDiscoveredServer, void *pUserContext)
-{
-    char serverHotkey = '.';
-    if (g_discoveredServers.size() < 9)
-    {
-        serverHotkey = static_cast<char>('1' + g_discoveredServers.size());
-    }
-
-    printf("[%c] %s %d.%d at %s ",
-           serverHotkey,
-           pDiscoveredServer->serverDescription.szHostApp,
-           pDiscoveredServer->serverDescription.HostAppVersion[0],
-           pDiscoveredServer->serverDescription.HostAppVersion[1],
-           pDiscoveredServer->serverAddress);
-
-    if (pDiscoveredServer->serverDescription.bConnectionInfoValid)
-    {
-        printf("(%s)\n", pDiscoveredServer->serverDescription.ConnectionMulticast ? "multicast" : "unicast");
-    } else
-    {
-        printf("(WARNING: Legacy server, could not autodetect settings. Auto-connect may not work reliably.)\n");
-    }
-
-    g_discoveredServers.push_back(*pDiscoveredServer);
 }
 
 // Establish a NatNet Client connection
@@ -535,62 +459,10 @@ DataHandler(sFrameOfMocapData *data, void *pUserData)
 {
     NatNetClient *pClient = (NatNetClient *) pUserData;
 
-// Software latency here is defined as the span of time between:
-//   a) The reception of a complete group of 2D frames from the camera system (CameraDataReceivedTimestamp)
-// and
-//   b) The time immediately prior to the NatNet frame being transmitted over the network (TransmitTimestamp)
-//
-// This figure may appear slightly higher than the "software latency" reported in the Motive user interface,
-// because it additionally includes the time spent preparing to stream the data via NatNet.
-    const uint64_t softwareLatencyHostTicks = data->TransmitTimestamp - data->CameraDataReceivedTimestamp;
-    const double softwareLatencyMillisec =
-            (softwareLatencyHostTicks * 1000) / static_cast<double>(g_serverDescription.HighResClockFrequency);
-
-// Transit latency is defined as the span of time between Motive transmitting the frame of data, and its reception by the client (now).
-// The SecondsSinceHostTimestamp method relies on NatNetClient's internal clock synchronization with the server using Cristian's algorithm.
-    const double transitLatencyMillisec = pClient->SecondsSinceHostTimestamp(data->TransmitTimestamp) * 1000.0;
-
-    if (g_outputFile)
-    {
-        _WriteFrame(g_outputFile, data
-        );
-    }
-
     int i = 0;
 
     printf("FrameID : %d\n", data->iFrame);
     printf("Timestamp : %3.2lf\n", data->fTimestamp);
-    printf("Software latency : %.2lf milliseconds\n", softwareLatencyMillisec);
-
-// Only recent versions of the Motive software in combination with ethernet camera systems support system latency measurement.
-// If it's unavailable (for example, with USB camera systems, or during playback), this field will be zero.
-    const bool bSystemLatencyAvailable = data->CameraMidExposureTimestamp != 0;
-
-    if (bSystemLatencyAvailable)
-    {
-// System latency here is defined as the span of time between:
-//   a) The midpoint of the camera exposure window, and therefore the average age of the photons (CameraMidExposureTimestamp)
-// and
-//   b) The time immediately prior to the NatNet frame being transmitted over the network (TransmitTimestamp)
-        const uint64_t systemLatencyHostTicks = data->TransmitTimestamp - data->CameraMidExposureTimestamp;
-        const double systemLatencyMillisec =
-                (systemLatencyHostTicks * 1000) / static_cast<double>(g_serverDescription.HighResClockFrequency);
-
-// Client latency is defined as the sum of system latency and the transit time taken to relay the data to the NatNet client.
-// This is the all-inclusive measurement (photons to client processing).
-        const double clientLatencyMillisec =
-                pClient->SecondsSinceHostTimestamp(data->CameraMidExposureTimestamp) * 1000.0;
-
-// You could equivalently do the following (not accounting for time elapsed since we calculated transit latency above):
-//const double clientLatencyMillisec = systemLatencyMillisec + transitLatencyMillisec;
-
-        printf("System latency : %.2lf milliseconds\n", systemLatencyMillisec);
-        printf("Total client latency : %.2lf milliseconds (transit time +%.2lf ms)\n", clientLatencyMillisec,
-               transitLatencyMillisec);
-    } else
-    {
-        printf("Transit latency : %.2lf milliseconds\n", transitLatencyMillisec);
-    }
 
 // FrameOfMocapData params
     bool bIsRecording = ((data->params & 0x01) != 0);
@@ -772,57 +644,6 @@ MessageHandler(Verbosity msgType, const char *msg)
 
     printf(": %s\n", msg);
 }
-
-
-/* File writing routines */
-void _WriteHeader(FILE *fp, sDataDescriptions *pBodyDefs)
-{
-    int i = 0;
-
-    if (pBodyDefs->arrDataDescriptions[0].type != Descriptor_MarkerSet)
-        return;
-
-    sMarkerSetDescription *pMS = pBodyDefs->arrDataDescriptions[0].Data.MarkerSetDescription;
-
-    fprintf(fp, "<MarkerSet>\n\n");
-    fprintf(fp, "<Name>\n%s\n</Name>\n\n", pMS->szName);
-
-    fprintf(fp, "<Markers>\n");
-    for (i = 0; i < pMS->nMarkers; i++)
-    {
-        fprintf(fp, "%s\n", pMS->szMarkerNames[i]);
-    }
-    fprintf(fp, "</Markers>\n\n");
-
-    fprintf(fp, "<Data>\n");
-    fprintf(fp, "Frame#\t");
-    for (i = 0; i < pMS->nMarkers; i++)
-    {
-        fprintf(fp, "M%dX\tM%dY\tM%dZ\t", i, i, i);
-    }
-    fprintf(fp, "\n");
-
-}
-
-
-void _WriteFrame(FILE *fp, sFrameOfMocapData *data)
-{
-    fprintf(fp, "%d", data->iFrame);
-    for (int i = 0; i < data->MocapData->nMarkers; i++)
-    {
-        fprintf(fp, "\t%.5f\t%.5f\t%.5f", data->MocapData->Markers[i][0], data->MocapData->Markers[i][1],
-                data->MocapData->Markers[i][2]);
-    }
-    fprintf(fp, "\n");
-}
-
-
-void _WriteFooter(FILE *fp)
-{
-    fprintf(fp, "</Data>\n\n");
-    fprintf(fp, "</MarkerSet>\n");
-}
-
 
 void resetClient()
 {
