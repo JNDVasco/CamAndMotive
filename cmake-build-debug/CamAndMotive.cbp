@@ -153,12 +153,73 @@
 					<DistClean command="nmake /NOLOGO /f &quot;C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\Makefile&quot; VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
+			<Target title="motiveExport">
+				<Option output="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/cmake-build-debug/motiveExport.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="msvc8"/>
+				<Compiler>
+					<Add directory="C:/Program Files (x86)/Intel RealSense SDK 2.0/include"/>
+					<Add directory="C:/Program Files (x86)/Intel RealSense SDK 2.0/third-party"/>
+					<Add directory="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/NatNetSDK/include"/>
+					<Add directory="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.5/include"/>
+					<Add directory="C:/Program Files (x86)/ZED SDK/include"/>
+					<Add directory="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/include"/>
+					<Add directory="C:/Program Files (x86)/ZED SDK/dependencies/opencv_3.1.0/include"/>
+					<Add directory="C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.30.30705\ATLMFC\include"/>
+					<Add directory="C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.30.30705\include"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\ucrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\\include\10.0.22000.0\\shared"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\\include\10.0.22000.0\\um"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\\include\10.0.22000.0\\winrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\\include\10.0.22000.0\\cppwinrt"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="nmake /NOLOGO /f &quot;C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\Makefile&quot; VERBOSE=1 motiveExport"/>
+					<CompileFile command="nmake /NOLOGO /f &quot;C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\Makefile&quot; VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="nmake /NOLOGO /f &quot;C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\Makefile&quot; VERBOSE=1 clean"/>
+					<DistClean command="nmake /NOLOGO /f &quot;C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\Makefile&quot; VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="motiveExport/fast">
+				<Option output="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/cmake-build-debug/motiveExport.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="msvc8"/>
+				<Compiler>
+					<Add directory="C:/Program Files (x86)/Intel RealSense SDK 2.0/include"/>
+					<Add directory="C:/Program Files (x86)/Intel RealSense SDK 2.0/third-party"/>
+					<Add directory="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/NatNetSDK/include"/>
+					<Add directory="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.5/include"/>
+					<Add directory="C:/Program Files (x86)/ZED SDK/include"/>
+					<Add directory="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/include"/>
+					<Add directory="C:/Program Files (x86)/ZED SDK/dependencies/opencv_3.1.0/include"/>
+					<Add directory="C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.30.30705\ATLMFC\include"/>
+					<Add directory="C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.30.30705\include"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\ucrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\\include\10.0.22000.0\\shared"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\\include\10.0.22000.0\\um"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\\include\10.0.22000.0\\winrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\\include\10.0.22000.0\\cppwinrt"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="nmake /NOLOGO /f &quot;C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\Makefile&quot; VERBOSE=1 motiveExport/fast"/>
+					<CompileFile command="nmake /NOLOGO /f &quot;C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\Makefile&quot; VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="nmake /NOLOGO /f &quot;C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\Makefile&quot; VERBOSE=1 clean"/>
+					<DistClean command="nmake /NOLOGO /f &quot;C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\Makefile&quot; VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
 		</Build>
 		<Unit filename="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/NatNetSDK/Samples/SampleClient/SampleClient.cpp">
 			<Option target="SampleClient"/>
 		</Unit>
 		<Unit filename="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/main.cpp">
 			<Option target="Main"/>
+		</Unit>
+		<Unit filename="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/motiveExport.cpp">
+			<Option target="motiveExport"/>
 		</Unit>
 		<Unit filename="C:/Users/JNDVasco/Desktop/PC Asus/Backup Asus/CLion/CamAndMotive/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>

@@ -131,6 +131,19 @@ Main\fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Main.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\Main.dir\build
 .PHONY : Main\fast
 
+#=============================================================================
+# Target rules for targets named motiveExport
+
+# Build rule for target.
+motiveExport: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 /nologo -$(MAKEFLAGS) motiveExport
+.PHONY : motiveExport
+
+# fast build rule for target.
+motiveExport\fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\motiveExport.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\motiveExport.dir\build
+.PHONY : motiveExport\fast
+
 NatNetSDK\Samples\SampleClient\SampleClient.obj: NatNetSDK\Samples\SampleClient\SampleClient.cpp.obj
 .PHONY : NatNetSDK\Samples\SampleClient\SampleClient.obj
 
@@ -179,6 +192,30 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Main.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\Main.dir\main.cpp.s
 .PHONY : main.cpp.s
 
+motiveExport.obj: motiveExport.cpp.obj
+.PHONY : motiveExport.obj
+
+# target to build an object file
+motiveExport.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\motiveExport.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\motiveExport.dir\motiveExport.cpp.obj
+.PHONY : motiveExport.cpp.obj
+
+motiveExport.i: motiveExport.cpp.i
+.PHONY : motiveExport.i
+
+# target to preprocess a source file
+motiveExport.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\motiveExport.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\motiveExport.dir\motiveExport.cpp.i
+.PHONY : motiveExport.cpp.i
+
+motiveExport.s: motiveExport.cpp.s
+.PHONY : motiveExport.s
+
+# target to generate assembly for a file
+motiveExport.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\motiveExport.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\motiveExport.dir\motiveExport.cpp.s
+.PHONY : motiveExport.cpp.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -189,12 +226,16 @@ help:
 	@echo ... rebuild_cache
 	@echo ... Main
 	@echo ... SampleClient
+	@echo ... motiveExport
 	@echo ... NatNetSDK/Samples/SampleClient/SampleClient.obj
 	@echo ... NatNetSDK/Samples/SampleClient/SampleClient.i
 	@echo ... NatNetSDK/Samples/SampleClient/SampleClient.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
+	@echo ... motiveExport.obj
+	@echo ... motiveExport.i
+	@echo ... motiveExport.s
 .PHONY : help
 
 

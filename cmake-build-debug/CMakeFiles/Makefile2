@@ -54,6 +54,7 @@ CMAKE_BINARY_DIR = "C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMo
 # The main recursive "all" target.
 all: CMakeFiles\SampleClient.dir\all
 all: CMakeFiles\Main.dir\all
+all: CMakeFiles\motiveExport.dir\all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -63,6 +64,7 @@ preinstall:
 # The main recursive "clean" target.
 clean: CMakeFiles\SampleClient.dir\clean
 clean: CMakeFiles\Main.dir\clean
+clean: CMakeFiles\motiveExport.dir\clean
 .PHONY : clean
 
 #=============================================================================
@@ -116,6 +118,32 @@ Main: CMakeFiles\Main.dir\rule
 CMakeFiles\Main.dir\clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Main.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\Main.dir\clean
 .PHONY : CMakeFiles\Main.dir\clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/motiveExport.dir
+
+# All Build rule for target.
+CMakeFiles\motiveExport.dir\all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\motiveExport.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\motiveExport.dir\depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\motiveExport.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\motiveExport.dir\build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\CMakeFiles" --progress-num=5,6 "Built target motiveExport"
+.PHONY : CMakeFiles\motiveExport.dir\all
+
+# Build rule for subdir invocation for target.
+CMakeFiles\motiveExport.dir\rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start "C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\CMakeFiles" 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 /nologo -$(MAKEFLAGS) CMakeFiles\motiveExport.dir\all
+	$(CMAKE_COMMAND) -E cmake_progress_start "C:\Users\JNDVasco\Desktop\PC Asus\Backup Asus\CLion\CamAndMotive\cmake-build-debug\CMakeFiles" 0
+.PHONY : CMakeFiles\motiveExport.dir\rule
+
+# Convenience name for target.
+motiveExport: CMakeFiles\motiveExport.dir\rule
+.PHONY : motiveExport
+
+# clean rule for target.
+CMakeFiles\motiveExport.dir\clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\motiveExport.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\motiveExport.dir\clean
+.PHONY : CMakeFiles\motiveExport.dir\clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

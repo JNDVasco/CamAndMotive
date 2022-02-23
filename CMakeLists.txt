@@ -58,3 +58,8 @@ endif ()
 
 add_executable(SampleClient NatNetSDK/Samples/SampleClient/SampleClient.cpp)
 target_link_libraries(SampleClient NatNetLib.lib)
+
+
+add_executable(motiveExport motiveExport.cpp)
+target_link_libraries(motiveExport NatNetLib.lib)
+

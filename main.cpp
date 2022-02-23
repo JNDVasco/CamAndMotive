@@ -115,6 +115,19 @@ typedef struct
     std::fstream depthRAW;
 } files;
 
+typedef struct
+{
+    std::atomic<uint64_t> timestamp;
+    std::atomic<int32_t> nMarkers;
+    std::atomic<sMarker> markers[50];
+    std::atomic<int32_t> nSkeletons;
+    std::atomic<sSkeletonData> skeletons[50];
+}motiveStruct;
+
+motiveStruct motiveData;
+
+const std::string motiveFilePath = "../dataOut/motive/data.bin";
+
 
 /* Aux functions declaration */
 uint64_t millis(); //uint64t has 8 bytes
@@ -129,9 +142,9 @@ void intelFrameCapture(files &, const rs2::pipeline &inputPipe, const rs2::color
 void zedFrameCapture(files &, sl::Camera &zedObject, sl::Resolution);
 
 
-void motiveFrameCapture();
+void motiveFrameCapture(std::fstream&);
 
-void threadTimerMotive(std::function<void()>, unsigned int interval);
+void threadTimerMotive(const std::function<void(std::fstream &)> &inputFunction, std::fstream &inputFile, unsigned int interval);
 
 int main()
 {
@@ -159,6 +172,9 @@ int main()
     zedFile.rgb.open(rgbFileZed, std::ios::out | std::ios::binary);
     zedFile.depthRAW.open(depthFileZed, std::ios::out | std::ios::binary);
     zedFile.depthRGB.open(depthRGBFileZed, std::ios::out | std::ios::binary);
+    std::fstream motiveFile;
+
+    motiveFile.open(motiveFilePath,std::ios::out | std::ios::binary);
 
     if (!intelFile.rgb.is_open() || !intelFile.depthRGB.is_open() || !intelFile.depthRAW.is_open() ||
         !zedFile.rgb.is_open() || !zedFile.depthRGB.is_open() || !zedFile.depthRAW.is_open())
@@ -374,107 +390,6 @@ int main()
     printf("\n\n[SampleClient] Requesting Data Descriptions...\n");
     sDataDescriptions *pDataDefs = NULL;
     iResult = g_pClient->GetDataDescriptionList(&pDataDefs);
-    if (iResult != ErrorCode_OK || pDataDefs == NULL)
-    {
-        printf("[SampleClient] Unable to retrieve Data Descriptions.\n");
-    } else
-    {
-        printf("[SampleClient] Received %d Data Descriptions:\n", pDataDefs->nDataDescriptions);
-        for (int i = 0; i < pDataDefs->nDataDescriptions; i++)
-        {
-            printf("Data Description # %d (type=%d)\n", i, pDataDefs->arrDataDescriptions[i].type);
-            if (pDataDefs->arrDataDescriptions[i].type == Descriptor_MarkerSet)
-            {
-                // MarkerSet
-                sMarkerSetDescription *pMS = pDataDefs->arrDataDescriptions[i].Data.MarkerSetDescription;
-                printf("MarkerSet Name : %s\n", pMS->szName);
-                for (int i = 0; i < pMS->nMarkers; i++)
-                    printf("%s\n", pMS->szMarkerNames[i]);
-
-            } else if (pDataDefs->arrDataDescriptions[i].type == Descriptor_RigidBody)
-            {
-                // RigidBody
-                sRigidBodyDescription *pRB = pDataDefs->arrDataDescriptions[i].Data.RigidBodyDescription;
-                printf("RigidBody Name : %s\n", pRB->szName);
-                printf("RigidBody ID : %d\n", pRB->ID);
-                printf("RigidBody Parent ID : %d\n", pRB->parentID);
-                printf("Parent Offset : %3.2f,%3.2f,%3.2f\n", pRB->offsetx, pRB->offsety, pRB->offsetz);
-
-                if (pRB->MarkerPositions != NULL && pRB->MarkerRequiredLabels != NULL)
-                {
-                    for (int markerIdx = 0; markerIdx < pRB->nMarkers; ++markerIdx)
-                    {
-                        const MarkerData &markerPosition = pRB->MarkerPositions[markerIdx];
-                        const int markerRequiredLabel = pRB->MarkerRequiredLabels[markerIdx];
-
-                        printf("\tMarker #%d:\n", markerIdx);
-                        printf("\t\tPosition: %.2f, %.2f, %.2f\n", markerPosition[0], markerPosition[1],
-                               markerPosition[2]);
-
-                        if (markerRequiredLabel != 0)
-                        {
-                            printf("\t\tRequired active label: %d\n", markerRequiredLabel);
-                        }
-                    }
-                }
-            } else if (pDataDefs->arrDataDescriptions[i].type == Descriptor_Skeleton)
-            {
-                // Skeleton
-                sSkeletonDescription *pSK = pDataDefs->arrDataDescriptions[i].Data.SkeletonDescription;
-                printf("Skeleton Name : %s\n", pSK->szName);
-                printf("Skeleton ID : %d\n", pSK->skeletonID);
-                printf("RigidBody (Bone) Count : %d\n", pSK->nRigidBodies);
-                for (int j = 0; j < pSK->nRigidBodies; j++)
-                {
-                    sRigidBodyDescription *pRB = &pSK->RigidBodies[j];
-                    printf("  RigidBody Name : %s\n", pRB->szName);
-                    printf("  RigidBody ID : %d\n", pRB->ID);
-                    printf("  RigidBody Parent ID : %d\n", pRB->parentID);
-                    printf("  Parent Offset : %3.2f,%3.2f,%3.2f\n", pRB->offsetx, pRB->offsety, pRB->offsetz);
-                }
-            } else if (pDataDefs->arrDataDescriptions[i].type == Descriptor_ForcePlate)
-            {
-                // Force Plate
-                sForcePlateDescription *pFP = pDataDefs->arrDataDescriptions[i].Data.ForcePlateDescription;
-                printf("Force Plate ID : %d\n", pFP->ID);
-                printf("Force Plate Serial : %s\n", pFP->strSerialNo);
-                printf("Force Plate Width : %3.2f\n", pFP->fWidth);
-                printf("Force Plate Length : %3.2f\n", pFP->fLength);
-                printf("Force Plate Electrical Center Offset (%3.3f, %3.3f, %3.3f)\n", pFP->fOriginX, pFP->fOriginY,
-                       pFP->fOriginZ);
-                for (int iCorner = 0; iCorner < 4; iCorner++)
-                    printf("Force Plate Corner %d : (%3.4f, %3.4f, %3.4f)\n", iCorner, pFP->fCorners[iCorner][0],
-                           pFP->fCorners[iCorner][1], pFP->fCorners[iCorner][2]);
-                printf("Force Plate Type : %d\n", pFP->iPlateType);
-                printf("Force Plate Data Type : %d\n", pFP->iChannelDataType);
-                printf("Force Plate Channel Count : %d\n", pFP->nChannels);
-                for (int iChannel = 0; iChannel < pFP->nChannels; iChannel++)
-                    printf("\tChannel %d : %s\n", iChannel, pFP->szChannelNames[iChannel]);
-            } else if (pDataDefs->arrDataDescriptions[i].type == Descriptor_Device)
-            {
-                // Peripheral Device
-                sDeviceDescription *pDevice = pDataDefs->arrDataDescriptions[i].Data.DeviceDescription;
-                printf("Device Name : %s\n", pDevice->strName);
-                printf("Device Serial : %s\n", pDevice->strSerialNo);
-                printf("Device ID : %d\n", pDevice->ID);
-                printf("Device Channel Count : %d\n", pDevice->nChannels);
-                for (int iChannel = 0; iChannel < pDevice->nChannels; iChannel++)
-                    printf("\tChannel %d : %s\n", iChannel, pDevice->szChannelNames[iChannel]);
-            } else if (pDataDefs->arrDataDescriptions[i].type == Descriptor_Camera)
-            {
-                // Camera
-                sCameraDescription *pCamera = pDataDefs->arrDataDescriptions[i].Data.CameraDescription;
-                printf("Camera Name : %s\n", pCamera->strName);
-                printf("Camera Position (%3.2f, %3.2f, %3.2f)\n", pCamera->x, pCamera->y, pCamera->z);
-                printf("Camera Orientation (%3.2f, %3.2f, %3.2f, %3.2f)\n", pCamera->qx, pCamera->qy, pCamera->qz,
-                       pCamera->qw);
-            } else
-            {
-                printf("Unknown data type.\n");
-                // Unknown
-            }
-        }
-    }
 
     // Ready to receive marker stream!
     printf("\nClient is connected to server and listening for data...\n");
@@ -485,8 +400,8 @@ int main()
     */
 
 /* =====================================================================================================================
- * =====================================================================================================================
- * ================================================================================================================== */
+* =====================================================================================================================
+* ================================================================================================================== */
     system("pause"); //Wait for the user press enter to start
     auto programBegin = std::chrono::high_resolution_clock::now();
     //Capture Stuff
@@ -495,7 +410,7 @@ int main()
 
     threadTimerIntel(intelFrameCapture, intelFile, intelPipe, color_map, millisBetweenFrames);
     threadTimerZed(zedFrameCapture, zedFile, zedCam, imageSize, millisBetweenFrames);
-    threadTimerMotive(motiveFrameCapture, millisBetweenFrames);
+    threadTimerMotive(motiveFrameCapture, motiveFile, millisBetweenFrames);
 
     //End Capture Stuff
     SetCtrlHandler(); //Capture CTRL + C so we know when to exit
@@ -564,8 +479,8 @@ uint64_t millis()
 
 
 /*======================================================================================================================
- *= Intel Capture Stuff
- *====================================================================================================================*/
+*= Intel Capture Stuff
+*====================================================================================================================*/
 void threadTimerIntel(const std::function<void(files &, const rs2::pipeline, const rs2::colorizer)> &inputFunction,
                       files &inputFiles, rs2::pipeline inputPipe, rs2::colorizer inputColorizer,
                       unsigned int interval)
@@ -593,19 +508,19 @@ void intelFrameCapture(files &inputFiles, const rs2::pipeline &inputPipe, const 
             if (vf.is<rs2::depth_frame>()) //If it is a depth frame
             {
                 auto pixels = (uint16_t *) vf.get_data(); //Grab the data pointer
-                inputFiles.depthRAW.write(reinterpret_cast<char *>(timestamp), sizeof(timestamp));
+                inputFiles.depthRAW.write(reinterpret_cast<char *>(&timestamp), sizeof(uint64_t));
                 inputFiles.depthRAW.write(reinterpret_cast<char *>(pixels),
                                           vf.get_data_size()); //Write the raw data to a file
 
                 vf = inputColorizer.process(frame);  //Apply a color map and "Make an image"
                 pixels = (uint16_t *) vf.get_data();   //Grab the data pointer
-                inputFiles.depthRGB.write(reinterpret_cast<char *>(timestamp), sizeof(timestamp));
+                inputFiles.depthRGB.write(reinterpret_cast<char *>(&timestamp), sizeof(timestamp));
                 inputFiles.depthRGB.write(reinterpret_cast<char *>(pixels),
                                           vf.get_data_size()); //Write the RGB Image to the file
             } else
             {
                 auto pixels = (uint16_t *) vf.get_data(); //Grab the data pointer
-                inputFiles.rgb.write(reinterpret_cast<char *>(timestamp), sizeof(timestamp));
+                inputFiles.rgb.write(reinterpret_cast<char *>(&timestamp), sizeof(timestamp));
                 inputFiles.rgb.write(reinterpret_cast<char *>(pixels), vf.get_data_size()); //Save to a file
             }
         }
@@ -614,8 +529,8 @@ void intelFrameCapture(files &inputFiles, const rs2::pipeline &inputPipe, const 
 }
 
 /*======================================================================================================================
- *= Zed Capture Stuff
- *====================================================================================================================*/
+*= Zed Capture Stuff
+*====================================================================================================================*/
 void threadTimerZed(const std::function<void(files &, sl::Camera &zedObject, sl::Resolution)> &inputFunction,
                     files &inputFiles, sl::Camera &zedObject, sl::Resolution frameRes, unsigned int interval)
 {
@@ -648,7 +563,7 @@ void zedFrameCapture(files &inputFiles, sl::Camera &zedObject, sl::Resolution fr
          * Grab a rgb image from the ZED
          */
         zedObject.retrieveImage(rgbData, sl::VIEW::LEFT);
-        inputFiles.rgb.write(reinterpret_cast<char *>(timestamp), sizeof(timestamp));
+        inputFiles.rgb.write(reinterpret_cast<char *>(&timestamp), sizeof(timestamp));
         inputFiles.rgb.write(reinterpret_cast<char *>(rgbData.getPtr<sl::uchar1>()),
                              (rgbData.getWidthBytes() * rgbData.getHeight())); //Save to a file
 
@@ -657,7 +572,7 @@ void zedFrameCapture(files &inputFiles, sl::Camera &zedObject, sl::Resolution fr
          * Grab a depth image from the ZED
          */
         zedObject.retrieveImage(depthData, sl::VIEW::DEPTH);
-        inputFiles.depthRGB.write(reinterpret_cast<char *>(timestamp), sizeof(timestamp));
+        inputFiles.depthRGB.write(reinterpret_cast<char *>(&timestamp), sizeof(timestamp));
         inputFiles.depthRGB.write(reinterpret_cast<char *>(depthData.getPtr<sl::uchar1>()),
                                   (depthData.getWidthBytes() * depthData.getHeight())); //Save to a file
 
@@ -667,9 +582,9 @@ void zedFrameCapture(files &inputFiles, sl::Camera &zedObject, sl::Resolution fr
          */
 
 /*
-   zedObject.retrieveMeasure(depthRawData, sl::MEASURE::XYZ);
-   inoutFiles.depthRAW.write(reinterpret_cast<char *>(depthRawData.getPtr<sl::uchar1>()),
-                             (depthRawData.getWidthBytes() * depthRawData.getHeight())); //Save to a file
+  zedObject.retrieveMeasure(depthRawData, sl::MEASURE::XYZ);
+  inoutFiles.depthRAW.write(reinterpret_cast<char *>(depthRawData.getPtr<sl::uchar1>()),
+                            (depthRawData.getWidthBytes() * depthRawData.getHeight())); //Save to a file
 */
 
     }
@@ -678,8 +593,8 @@ void zedFrameCapture(files &inputFiles, sl::Camera &zedObject, sl::Resolution fr
 }
 
 /*======================================================================================================================
- *= Motive Capture Stuff
- *====================================================================================================================*/
+*= Motive Capture Stuff
+*====================================================================================================================*/
 // Establish a NatNet Client connection
 int ConnectClient()
 {
@@ -751,116 +666,78 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData *data, void *pUserData)
 
     int i = 0;
 
-    printf("FrameID : %d\n", data->iFrame);
-    printf("Timestamp : %3.2lf\n", data->fTimestamp);
+    motiveData.nMarkers = data->nLabeledMarkers;
+    motiveData.nSkeletons = data->nSkeletons;
 
-    // memcpy(globalFrameData, data, sizeof(data));
+    memcpy(motiveData.skeletons, data->Skeletons, 50 * sizeof(sSkeletonData));
+    memcpy(motiveData.markers, data->LabeledMarkers, 50 * sizeof(sMarker));
 
+/*
 
-// Rigid Bodies
-    printf("Rigid Bodies [Count=%d]\n", data->nRigidBodies);
-    for (i = 0; i < data->nRigidBodies; i++)
-    {
-// params
-// 0x01 : bool, rigid body was successfully tracked in this frame
-        bool bTrackingValid = data->RigidBodies[i].params & 0x01;
-
-        printf("Rigid Body [ID=%d  Error=%3.2f  Valid=%d]\n", data->RigidBodies[i].ID, data->RigidBodies[i].MeanError,
-               bTrackingValid);
-        printf("\tx\ty\tz\tqx\tqy\tqz\tqw\n");
-        printf("\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
-               data->RigidBodies[i].x,
-               data->RigidBodies[i].y,
-               data->RigidBodies[i].z,
-               data->RigidBodies[i].qx,
-               data->RigidBodies[i].qy,
-               data->RigidBodies[i].qz,
-               data->RigidBodies[i].qw);
-    }
 
 // Skeletons
-    printf("Skeletons [Count=%d]\n", data->nSkeletons);
-    for (i = 0; i < data->nSkeletons; i++)
-    {
-        sSkeletonData skData = data->Skeletons[i];
-        printf("Skeleton [ID=%d  Bone count=%d]\n", skData.skeletonID, skData.nRigidBodies);
-        for (int j = 0; j < skData.nRigidBodies; j++)
-        {
-            sRigidBodyData rbData = skData.RigidBodyData[j];
-            printf("Bone %d\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
-                   rbData.ID, rbData.x, rbData.y, rbData.z, rbData.qx, rbData.qy, rbData.qz, rbData.qw);
-        }
-    }
+   printf("Skeletons [Count=%d]\n", data->nSkeletons);
+   for (i = 0; i < data->nSkeletons; i++)
+   {
+       sSkeletonData skData = data->Skeletons[i];
+       printf("Skeleton [ID=%d  Bone count=%d]\n", skData.skeletonID, skData.nRigidBodies);
+       for (int j = 0; j < skData.nRigidBodies; j++)
+       {
+           sRigidBodyData rbData = skData.RigidBodyData[j];
+           printf("Bone %d\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
+                  rbData.ID, rbData.x, rbData.y, rbData.z, rbData.qx, rbData.qy, rbData.qz, rbData.qw);
+       }
+   }
 
 // labeled markers - this includes all markers (Active, Passive, and 'unlabeled' (markers with no asset but a PointCloud ID)
-    bool bOccluded;     // marker was not visible (occluded) in this frame
-    bool bPCSolved;     // reported position provided by point cloud solve
-    bool bModelSolved;  // reported position provided by model solve
-    bool bHasModel;     // marker has an associated asset in the data stream
-    bool bUnlabeled;    // marker is 'unlabeled', but has a point cloud ID that matches Motive PointCloud ID (In Motive 3D View)
-    bool bActiveMarker; // marker is an actively labeled LED marker
+   bool bOccluded;     // marker was not visible (occluded) in this frame
+   bool bPCSolved;     // reported position provided by point cloud solve
+   bool bModelSolved;  // reported position provided by model solve
+   bool bHasModel;     // marker has an associated asset in the data stream
+   bool bUnlabeled;    // marker is 'unlabeled', but has a point cloud ID that matches Motive PointCloud ID (In Motive 3D View)
+   bool bActiveMarker; // marker is an actively labeled LED marker
 
-    printf("Markers [Count=%d]\n", data->nLabeledMarkers);
-    for (i = 0; i < data->nLabeledMarkers; i++)
-    {
-        bOccluded = ((data->LabeledMarkers[i].params & 0x01) != 0);
-        bPCSolved = ((data->LabeledMarkers[i].params & 0x02) != 0);
-        bModelSolved = ((data->LabeledMarkers[i].params & 0x04) != 0);
-        bHasModel = ((data->LabeledMarkers[i].params & 0x08) != 0);
-        bUnlabeled = ((data->LabeledMarkers[i].params & 0x10) != 0);
-        bActiveMarker = ((data->LabeledMarkers[i].params & 0x20) != 0);
+   printf("Markers [Count=%d]\n", data->nLabeledMarkers);
+   for (i = 0; i < data->nLabeledMarkers; i++)
+   {
+       bOccluded = ((data->LabeledMarkers[i].params & 0x01) != 0);
+       bPCSolved = ((data->LabeledMarkers[i].params & 0x02) != 0);
+       bModelSolved = ((data->LabeledMarkers[i].params & 0x04) != 0);
+       bHasModel = ((data->LabeledMarkers[i].params & 0x08) != 0);
+       bUnlabeled = ((data->LabeledMarkers[i].params & 0x10) != 0);
+       bActiveMarker = ((data->LabeledMarkers[i].params & 0x20) != 0);
 
-        sMarker marker = data->LabeledMarkers[i];
+       sMarker marker = data->LabeledMarkers[i];
 
 // Marker ID Scheme:
 // Active Markers:
 //   ID = ActiveID, correlates to RB ActiveLabels list
 // Passive Markers:
 //   If Asset with Legacy Labels
-//      AssetID 	(Hi Word)
-//      MemberID	(Lo Word)
+//      AssetID    (Hi Word)
+//      MemberID   (Lo Word)
 //   Else
 //      PointCloud ID
-        int modelID, markerID;
-        NatNet_DecodeID(marker.ID, &modelID, &markerID);
+       int modelID, markerID;
+       NatNet_DecodeID(marker.ID, &modelID, &markerID);
 
-        char szMarkerType[512];
-        if (bActiveMarker)
-        {
-            strcpy(szMarkerType, "Active");
-        } else if (bUnlabeled)
-        {
-            strcpy(szMarkerType, "Unlabeled");
-        } else
-        {
-            strcpy(szMarkerType, "Labeled");
-        }
+       char szMarkerType[512];
+       if (bActiveMarker)
+       {
+           strcpy(szMarkerType, "Active");
+       } else if (bUnlabeled)
+       {
+           strcpy(szMarkerType, "Unlabeled");
+       } else
+       {
+           strcpy(szMarkerType, "Labeled");
+       }
 
-        printf("%s Marker [ModelID=%d, MarkerID=%d] [size=%3.2f] [pos=%3.2f,%3.2f,%3.2f]\n",
-               szMarkerType, modelID, markerID, marker.size, marker.x, marker.y, marker.z);
-    }
+       printf("%s Marker [ModelID=%d, MarkerID=%d] [size=%3.2f] [pos=%3.2f,%3.2f,%3.2f]\n",
+              szMarkerType, modelID, markerID, marker.size, marker.x, marker.y, marker.z);
+   }
+*/
 
-// force plates
-    printf("Force Plate [Count=%d]\n", data->nForcePlates);
-    for (int iPlate = 0; iPlate < data->nForcePlates; iPlate++)
-    {
-        printf("Force Plate %d\n", data->ForcePlates[iPlate].ID);
-        for (int iChannel = 0; iChannel < data->ForcePlates[iPlate].nChannels; iChannel++)
-        {
-            printf("\tChannel %d:\t", iChannel);
-            if (data->ForcePlates[iPlate].ChannelData[iChannel].nFrames == 0)
-            {
-                printf("\tEmpty Frame\n");
-            } else if (data->ForcePlates[iPlate].ChannelData[iChannel].nFrames != g_analogSamplesPerMocapFrame)
-            {
-                printf("\tPartial Frame [Expected:%d   Actual:%d]\n", g_analogSamplesPerMocapFrame,
-                       data->ForcePlates[iPlate].ChannelData[iChannel].nFrames);
-            }
-            for (int iSample = 0; iSample < data->ForcePlates[iPlate].ChannelData[iChannel].nFrames; iSample++)
-                printf("%3.2f\t", data->ForcePlates[iPlate].ChannelData[iChannel].Values[iSample]);
-            printf("\n");
-        }
-    }
 }
 
 
@@ -914,23 +791,25 @@ void resetClient()
 }
 
 
-void threadTimerMotive(const std::function<void()> &inputFunction, unsigned int interval)
+void threadTimerMotive(const std::function<void(std::fstream &)> &inputFunction, std::fstream &inputFile, unsigned int interval)
 {
-    std::thread([inputFunction, interval]()
+    std::thread([inputFunction, interval, &inputFile]()
                 {
                     while (!exit_app)
                     {
                         auto x = std::chrono::steady_clock::now() + std::chrono::milliseconds(interval);
 
-                        inputFunction();
+                        inputFunction(inputFile);
 
                         std::this_thread::sleep_until(x);
                     }
                 }).detach();
 }
 
-void motiveFrameCapture()
+void motiveFrameCapture(std::fstream & inputFile)
 {
+    motiveData.timestamp = millis();
+    inputFile.write(reinterpret_cast<char *>(&motiveData), sizeof(motiveData));
     motiveFrameCount++;
 }
 
